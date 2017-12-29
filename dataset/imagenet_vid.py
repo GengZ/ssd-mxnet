@@ -31,10 +31,17 @@ class ImageNetVID(Imdb):
             names='None', true_negative_images=False):
         super(ImageNetVID, self).__init__(image_set)
         self.image_set = image_set
+        # -----------------------------------------------------
+        # modified for vid
         if self.image_set.startswith('VID_train_15frames'):
             self.vid_frame_flag = 1
         else:
             self.vid_frame_flag = 0
+        if self.image_set.startswith('DET'):
+            self.dir_completer = 'DET'
+        elif self.image_set.startswith('VID'):
+            self.dir_completer = 'VID'
+        # -----------------------------------------------------
         # self.year = year
         self.devkit_path = devkit_path
         # self.data_path = os.path.join(devkit_path, 'VOC' + year)
@@ -179,7 +186,8 @@ class ImageNetVID(Imdb):
         """
         assert self.image_set_index is not None, "Dataset not initialized"
         name = self.image_set_index[index]
-        image_file = os.path.join(self.data_path, 'JPEGImages', name + self.extension)
+        # image_file = os.path.join(self.data_path, 'JPEGImages', name + self.extension)
+        image_file = os.path.join(self.data_path, 'Data', self.dir_completer, name + self.extension)
         assert os.path.exists(image_file), 'Path does not exist: {}'.format(image_file)
         return image_file
 
