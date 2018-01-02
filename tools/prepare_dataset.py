@@ -90,6 +90,7 @@ def load_imagenet_vid(image_set, dataset_path, shuffle=False, class_names=None, 
         imdbs.append(ImageNetVID(s, dataset_path, shuffle, is_train=True, class_names=class_names, true_negative_images=true_negative))
     if len(imdbs) > 1:
         return ConcatDB(imdbs, shuffle)
+        print('imdbs concatenated ...')
     else:
         return imdbs[0]
 
@@ -169,6 +170,6 @@ if __name__ == '__main__':
         im2rec_path = os.path.join(os.path.dirname(os.path.dirname(mxnet.__path__[0])), 'tools/im2rec.py')
     subprocess.check_call(["python", im2rec_path,
         os.path.abspath(args.target), os.path.abspath(args.root_path),
-        "--shuffle", str(int(args.shuffle)), "--pack-label", "1"])
+        "--shuffle", str(int(args.shuffle)), "--pack-label", "1", "--num-thread", "8"])
 
     print("Record file {} generated...".format(args.target.split('.')[0] + '.rec'))
