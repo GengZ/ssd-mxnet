@@ -69,7 +69,12 @@ def load_imagenet_vid(image_set, dataset_path, shuffle=False, class_names=None, 
     Imdb
     """
     # image_set = [y.strip() for y in image_set.split(',')]
-    image_set = ['DET_train_30classes', 'VID_train_15frames']
+    if image_set == 'test':
+        image_set = ['VID_val_frames']
+        print("generating test files with {}...".format(image_set))
+    else:
+        image_set = ['DET_train_30classes', 'VID_train_15frames']
+        print("generating train files with {}, {}...".format(image_set[0], image_set[1]))
     assert image_set, "No image_set specified"
     # year = [y.strip() for y in year.split(',')]
     # assert year, "No year specified"
@@ -154,20 +159,23 @@ if __name__ == '__main__':
         print("saving list to disk...")
         db.save_imglist(args.target, root=args.root_path)
     elif args.dataset == 'imagenet_vid':
-        db = load_imagenet_vid(args.set, args.root_path, args.shuffle-args.shuffle)
+        db = load_imagenet_vid(args.set, args.root_path, args.shuffle)
         print("saving list to disk...")
         db.save_imglist(args.target, root=args.root_path)
-    # def __init__(image_set, dataset_path, devkit_path, shuffle=False, is_train=False, class_names=None,
-    #         names='None', true_negative_images=False):
     else:
         raise NotImplementedError("No implementation for dataset: " + args.dataset)
 
     print("List file {} generated...".format(args.target))
+    # ---
 
-    im2rec_path = os.path.join(mxnet.__path__[0], 'tools/im2rec.py')
+    # im2rec_path = os.path.join(mxnet.__path__[0], 'tools/im2rec.py')
     # final validation - sometimes __path__ (or __file__) gives 'mxnet/python/mxnet' instead of 'mxnet'
-    if not os.path.exists(im2rec_path):
-        im2rec_path = os.path.join(os.path.dirname(os.path.dirname(mxnet.__path__[0])), 'tools/im2rec.py')
+    # if not os.path.exists(im2rec_path):
+    #     im2rec_path = os.path.join(os.path.dirname(os.path.dirname(mxnet.__path__[0])), 'tools/im2rec.py')
+
+    # mxnet installed via pip install --user -e .
+    # in that way mxnet cannot be found by default original approach
+    im2rec_path = '/home/gengz/git/mxnet/tools/im2rec.py'
     subprocess.check_call(["python", im2rec_path,
         os.path.abspath(args.target), os.path.abspath(args.root_path),
         "--shuffle", str(int(args.shuffle)), "--pack-label", "1", "--num-thread", "8"])
