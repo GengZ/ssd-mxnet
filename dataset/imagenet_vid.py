@@ -55,7 +55,8 @@ class ImageNetVID(Imdb):
         # else:
         #     self.classes = self._load_class_names(names,
         #         os.path.join(os.path.dirname(__file__), 'names'))
-        self.classes = ['__background__',  # always index 0
+        # self.classes = ['__background__',  # always index 0
+        self.classes = [  # always index 0
                         'airplane', 'antelope', 'bear', 'bicycle',
                         'bird', 'bus', 'car', 'cattle',
                         'dog', 'domestic_cat', 'elephant', 'fox',
@@ -64,7 +65,7 @@ class ImageNetVID(Imdb):
                         'red_panda', 'sheep', 'snake', 'squirrel',
                         'tiger', 'train', 'turtle', 'watercraft',
                         'whale', 'zebra']
-        self.classes_map = ['__background__',  # always index 0
+        self.classes_map = [  # always index 0
                         'n02691156', 'n02419796', 'n02131653', 'n02834778',
                         'n01503061', 'n02924116', 'n02958343', 'n02402425',
                         'n02084071', 'n02121808', 'n02503517', 'n02118333',
@@ -263,8 +264,8 @@ class ImageNetVID(Imdb):
                 cls_name_ = obj.find('name').text
                 cls_name = self.map_class_name(str(cls_name_))
                 if cls_name not in self.classes:
-                    # cls_id = len(self.classes)
-                    cls_id = 0
+                    cls_id = len(self.classes)
+                    # cls_id = 0
                 else:
                     cls_id = self.classes.index(cls_name)
                 xml_box = obj.find('bndbox')
