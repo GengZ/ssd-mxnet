@@ -82,10 +82,13 @@ class ImageNetVID(Imdb):
         self.image_set_index = self._load_image_set_index(shuffle)
         self.num_images = len(self.image_set_index)
         self._difficult = 0
+        self.other_class_count = 0
         if self.is_train:
             self.labels = self._load_image_labels()
         print('+' * 30)
         print('{} images with raw label cropped'.format(len(self.labels)))
+        print('{} other class lables filtered out'.format(self.other_class_count))
+        print(self.image_set)
         # filter images with no ground-truth, like in case you use only a subset of classes
         if not self.true_negative_images:
             self._filter_image_with_no_gt()
@@ -231,10 +234,15 @@ class ImageNetVID(Imdb):
     def map_class_name(self, class_id):
         if class_id in self.classes_map:
             class_index = self.classes_map.index(class_id)
+            return self.classes[class_index]
         else:
             # default as background
-            class_index = 0
-        return self.classes[class_index]
+            # print('+++')
+            # print(class_id)
+            # print(self.image_set)
+            # print('---')
+            class_index = -1
+            return class_index
 
     def _load_image_labels(self):
         """
@@ -249,6 +257,7 @@ class ImageNetVID(Imdb):
         # load ground-truth from xml annotations
         for idx in self.image_set_index:
             label_file = self._label_path_from_index(idx)
+            self.label_file = label_file
             tree = ET.parse(label_file)
             root = tree.getroot()
             size = root.find('size')
@@ -263,17 +272,21 @@ class ImageNetVID(Imdb):
                 #     continue
                 cls_name_ = obj.find('name').text
                 cls_name = self.map_class_name(str(cls_name_))
-                if cls_name not in self.classes:
-                    cls_id = len(self.classes)
+                # if cls_name not in self.classes:
+                #     cls_id = len(self.classes)
+                if cls_name != -1:
+                    # cls_id = len(self.classes)
                     # cls_id = 0
-                else:
+                # else:
                     cls_id = self.classes.index(cls_name)
-                xml_box = obj.find('bndbox')
-                xmin = float(xml_box.find('xmin').text) / width
-                ymin = float(xml_box.find('ymin').text) / height
-                xmax = float(xml_box.find('xmax').text) / width
-                ymax = float(xml_box.find('ymax').text) / height
-                label.append([cls_id, xmin, ymin, xmax, ymax, difficult])
+                    xml_box = obj.find('bndbox')
+                    xmin = float(xml_box.find('xmin').text) / width
+                    ymin = float(xml_box.find('ymin').text) / height
+                    xmax = float(xml_box.find('xmax').text) / width
+                    ymax = float(xml_box.find('ymax').text) / height
+                    label.append([cls_id, xmin, ymin, xmax, ymax, difficult])
+                else:
+                    self.other_class_count += 1
             if len(label) != 0:
                 temp.append(np.array(label))
         return temp
