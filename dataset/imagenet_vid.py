@@ -81,8 +81,10 @@ class ImageNetVID(Imdb):
         self.num_classes = len(self.classes)
         self.image_set_index = self._load_image_set_index(shuffle)
         self.num_images = len(self.image_set_index)
+        # self defined
         self._difficult = 0
         self.other_class_count = 0
+        #
         if self.is_train:
             self.labels = self._load_image_labels()
         print('+' * 30)
@@ -274,18 +276,19 @@ class ImageNetVID(Imdb):
                 cls_name = self.map_class_name(str(cls_name_))
                 # if cls_name not in self.classes:
                 #     cls_id = len(self.classes)
-                if cls_name == -1:
-                    cls_id = len(self.classes)
-                    self.other_class_count += 1
-                    # cls_id = 0
-                else:
+                # if cls_name == -1:
+                #     cls_id = len(self.classes)
+                #     self.other_class_count += 1
+                # else:
+                #     cls_id = self.classes.index(cls_name)
+                if cls_name != -1:
                     cls_id = self.classes.index(cls_name)
-                xml_box = obj.find('bndbox')
-                xmin = float(xml_box.find('xmin').text) / width
-                ymin = float(xml_box.find('ymin').text) / height
-                xmax = float(xml_box.find('xmax').text) / width
-                ymax = float(xml_box.find('ymax').text) / height
-                label.append([cls_id, xmin, ymin, xmax, ymax, difficult])
+                    xml_box = obj.find('bndbox')
+                    xmin = float(xml_box.find('xmin').text) / width
+                    ymin = float(xml_box.find('ymin').text) / height
+                    xmax = float(xml_box.find('xmax').text) / width
+                    ymax = float(xml_box.find('ymax').text) / height
+                    label.append([cls_id, xmin, ymin, xmax, ymax, difficult])
             if len(label) != 0:
                 temp.append(np.array(label))
         return temp

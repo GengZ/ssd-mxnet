@@ -168,14 +168,14 @@ if __name__ == '__main__':
     print("List file {} generated...".format(args.target))
     # ---
 
-    # im2rec_path = os.path.join(mxnet.__path__[0], 'tools/im2rec.py')
+    im2rec_path = os.path.join(mxnet.__path__[0], 'tools/im2rec.py')
     # final validation - sometimes __path__ (or __file__) gives 'mxnet/python/mxnet' instead of 'mxnet'
-    # if not os.path.exists(im2rec_path):
-    #     im2rec_path = os.path.join(os.path.dirname(os.path.dirname(mxnet.__path__[0])), 'tools/im2rec.py')
+    if not os.path.exists(im2rec_path):
+        im2rec_path = os.path.join(os.path.dirname(os.path.dirname(mxnet.__path__[0])), 'tools/im2rec.py')
 
     # mxnet installed via pip install --user -e .
     # in that way mxnet cannot be found by default original approach
-    im2rec_path = '/home/gengz/git/mxnet/tools/im2rec.py'
+    # im2rec_path = '/home/gengz/git/mxnet/tools/im2rec.py'
     subprocess.check_call(["python", im2rec_path,
         os.path.abspath(args.target), os.path.abspath(args.root_path),
         "--shuffle", str(int(args.shuffle)), "--pack-label", "1", "--num-thread", "8"])
