@@ -87,15 +87,15 @@ class ImageNetVID(Imdb):
         #
         if self.is_train:
             self.labels = self._load_image_labels()
-        print('+' * 30)
-        print('{} images with raw label cropped'.format(len(self.labels)))
-        print('{} other class lables filtered out'.format(self.other_class_count))
+        # print('+' * 30)
+        # print('{} images with raw label cropped'.format(len(self.labels)))
+        # print('{} other class lables filtered out'.format(self.other_class_count))
         print(self.image_set)
         # filter images with no ground-truth, like in case you use only a subset of classes
         if not self.true_negative_images:
             self._filter_image_with_no_gt()
-        print('{} images with washed label cropped'.format(len(self.labels)))
-        print('-' * 30)
+        # print('{} images with washed label cropped'.format(len(self.labels)))
+        # print('-' * 30)
 
     @property
     def cache_path(self):
@@ -259,7 +259,6 @@ class ImageNetVID(Imdb):
         # load ground-truth from xml annotations
         for idx in self.image_set_index:
             label_file = self._label_path_from_index(idx)
-            self.label_file = label_file
             tree = ET.parse(label_file)
             root = tree.getroot()
             size = root.find('size')
@@ -272,25 +271,22 @@ class ImageNetVID(Imdb):
                 difficult = self._difficult
                 # if not self.config['use_difficult'] and difficult == 1:
                 #     continue
-                cls_name_ = obj.find('name').text
-                cls_name = self.map_class_name(str(cls_name_))
+                cls_name = obj.find('name').text
+                # if cls_name not in self.classes_map:
+                #     continue
                 # if cls_name not in self.classes:
-                #     cls_id = len(self.classes)
-                # if cls_name == -1:
-                #     cls_id = len(self.classes)
-                #     self.other_class_count += 1
-                # else:
-                #     cls_id = self.classes.index(cls_name)
-                if cls_name != -1:
-                    cls_id = self.classes.index(cls_name)
-                    xml_box = obj.find('bndbox')
-                    xmin = float(xml_box.find('xmin').text) / width
-                    ymin = float(xml_box.find('ymin').text) / height
-                    xmax = float(xml_box.find('xmax').text) / width
-                    ymax = float(xml_box.find('ymax').text) / height
-                    label.append([cls_id, xmin, ymin, xmax, ymax, difficult])
-            if len(label) != 0:
-                temp.append(np.array(label))
+                if cls_name not in self.classes_map:
+                    cls_id = len(self.classes)
+                else:
+                    cls_id = self.classes_map.index(cls_name)
+                xml_box = obj.find('bndbox')
+                xmin = float(xml_box.find('xmin').text) / width
+                ymin = float(xml_box.find('ymin').text) / height
+                xmax = float(xml_box.find('xmax').text) / width
+                ymax = float(xml_box.find('ymax').text) / height
+                label.append([cls_id, xmin, ymin, xmax, ymax, difficult])
+            # if len(label) != 0:
+            temp.append(np.array(label))
         return temp
 
     def evaluate_detections(self, detections):

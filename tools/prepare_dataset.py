@@ -72,6 +72,12 @@ def load_imagenet_vid(image_set, dataset_path, shuffle=False, class_names=None, 
     if image_set == 'test':
         image_set = ['VID_val_frames']
         print("generating test files with {}...".format(image_set))
+    elif image_set == 'det_train':
+        image_set = ['DET_train_30classes']
+        print("generating test files with {}...".format(image_set))
+    elif image_set == 'vid_train':
+        image_set = ['VID_trian_15_frames']
+        print("generating test files with {}...".format(image_set))
     else:
         image_set = ['DET_train_30classes', 'VID_train_15frames']
         print("generating train files with {}, {}...".format(image_set[0], image_set[1]))
@@ -172,6 +178,8 @@ if __name__ == '__main__':
     # final validation - sometimes __path__ (or __file__) gives 'mxnet/python/mxnet' instead of 'mxnet'
     if not os.path.exists(im2rec_path):
         im2rec_path = os.path.join(os.path.dirname(os.path.dirname(mxnet.__path__[0])), 'tools/im2rec.py')
+    if not os.path.exists(im2rec_path):
+        im2rec_path = "/home/gengz/git/mxnet/tools/im2rec.py"
 
     # mxnet installed via pip install --user -e .
     # in that way mxnet cannot be found by default original approach
