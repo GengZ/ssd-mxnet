@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # python tools/prepare_dataset.py --dataset imagenet_vid --set test --root ~/data/vid_data --target ./rec_data/test.lst --shuffle False
-python tools/prepare_dataset.py --dataset imagenet_vid --set det_train --root ~/data/vid_data --target ./vid_rec/train.lst
+python tools/prepare_dataset.py --dataset imagenet_vid --set all --root ~/data/vid_pair_data --target ./data/pair_rec_data/DET_30classes_VID_15frames.lst
 # echo prepare data done
 # cp ./rec_data/* ~/data/vid_rec/
 # echo copy data

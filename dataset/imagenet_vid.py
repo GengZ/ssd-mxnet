@@ -202,18 +202,40 @@ class ImageNetVID(Imdb):
         given image indexes, make pair image dataset for feature flow detection
         """
         import cv2
+        from multiprocessing.dummy import Pool
+        # from multiprocessing import Pool
+
+        pool = Pool(processes = 16)
         assert self.image_set_index is not None, "Dataset not initialized"
         # for iname in self.image_set_index:
-        for iname in [self.image_set_index[0]]:
+        # for iname in [self.image_set_index[0]]:
+        # cnt = 0
+        def make_pair_single_thread(iname):
 
-            print(iname)
-            frame_id = iname.split('.')[0][-6:]
-            print(frame_id)
-            frame_id = int(frame_id)
-            pattern = iname.split('.')[0][:-7]
+            # print(iname)
+            # frame_id = iname.split('.')[0][-6:]
+            # print(frame_id)
+            if "VID" in iname:
+                frame_id = iname.split('.')[0].split('/')[-1]
+                frame_id = int(frame_id)
+            else:
+                frame_id = iname.split('.')[0].split('/')[-1]
+                # print(frame_id)
+
+            if "VID" in iname:
+                pattern = iname.split('.')[0][:-7]
+            else:
+                pattern_list = iname.split('/')[:-1]
+                pattern = '/'.join(pattern_list)
 
             # with no suffix
-            cur_name = os.path.join(pattern, format(int(frame_id), '06d'))
+            if "VID" in iname:
+                cur_name = os.path.join(pattern, format(int(frame_id), '06d'))
+            # if "DET" in iname:
+            else:
+                cur_name = os.path.join(pattern, frame_id)
+                # cur_name = frame_id
+
             cur_image_path = os.path.join(self.data_path, 'Data', self.dir_completer, cur_name + self.extension)
             cur_image = cv2.imread(cur_image_path)
             assert cur_image is not None, 'cur_aimge {} does not exists'.format(cur_image_path)
@@ -226,17 +248,26 @@ class ImageNetVID(Imdb):
                 ref_image_path = os.path.join(self.data_path, 'Data', self.dir_completer, ref_name + self.extension)
                 ref_image = cv2.imread(ref_image_path)
 
-            if "DET" in iname:
+            # if "DET" in iname:
+            else:
                 ref_image_path = cur_image_path
                 ref_image = cur_image
-            assert ref_image is not None, 'ref_image {} does not exists'.format(ref_image_path)
+            assert ref_image is not None, 'ref_image {} does not exists\n \
+                                            cur image is {}'.format(ref_image_path, cur_image_path)
 
             dst_dir = self.get_dst_dir(pattern, output_path)
             vis = np.concatenate((ref_image, cur_image), axis = 0)
-            output_image_name = format(int(frame_id), '06d') + self.extension
+
+            if "VID" in iname:
+                output_image_name = format(int(frame_id), '06d') + self.extension
+            # if "DET" in iname:
+            else:
+                output_image_name = frame_id + self.extension
+
             final_output_path = os.path.join(dst_dir, output_image_name)
-            print(final_output_path)
             cv2.imwrite(final_output_path, vis)
+
+        pool.map(make_pair_single_thread, self.image_set_index)
 
 
     def get_dst_dir(self, pattern, dst_root):
