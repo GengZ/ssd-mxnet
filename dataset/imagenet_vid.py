@@ -197,6 +197,58 @@ class ImageNetVID(Imdb):
         assert os.path.exists(image_file), 'Path does not exist: {}'.format(image_file)
         return image_file
 
+    def make_pair(self, output_path, upper_thres=0, lower_thres=-9):
+        """
+        given image indexes, make pair image dataset for feature flow detection
+        """
+        import cv2
+        assert self.image_set_index is not None, "Dataset not initialized"
+        # for iname in self.image_set_index:
+        for iname in [self.image_set_index[0]]:
+
+            print(iname)
+            frame_id = iname.split('.')[0][-6:]
+            print(frame_id)
+            frame_id = int(frame_id)
+            pattern = iname.split('.')[0][:-7]
+
+            # with no suffix
+            cur_name = os.path.join(pattern, format(int(frame_id), '06d'))
+            cur_image_path = os.path.join(self.data_path, 'Data', self.dir_completer, cur_name + self.extension)
+            cur_image = cv2.imread(cur_image_path)
+            assert cur_image is not None, 'cur_aimge {} does not exists'.format(cur_image_path)
+
+            if "VID" in iname:
+                ref_frame_id = min(max(frame_id + np.random.randint(lower_thres, upper_thres), 0), frame_id)
+
+                # with no suffix
+                ref_name = os.path.join(pattern, format(int(ref_frame_id), '06d'))
+                ref_image_path = os.path.join(self.data_path, 'Data', self.dir_completer, ref_name + self.extension)
+                ref_image = cv2.imread(ref_image_path)
+
+            if "DET" in iname:
+                ref_image_path = cur_image_path
+                ref_image = cur_image
+            assert ref_image is not None, 'ref_image {} does not exists'.format(ref_image_path)
+
+            dst_dir = self.get_dst_dir(pattern, output_path)
+            vis = np.concatenate((ref_image, cur_image), axis = 0)
+            output_image_name = format(int(frame_id), '06d') + self.extension
+            final_output_path = os.path.join(dst_dir, output_image_name)
+            print(final_output_path)
+            cv2.imwrite(final_output_path, vis)
+
+
+    def get_dst_dir(self, pattern, dst_root):
+        import os
+        dst_dir = os.path.join(dst_root, 'Data', self.dir_completer, pattern)
+        try:
+            # os.makedirs(dst_dir, exist_ok=True)
+            os.makedirs(dst_dir)
+        except OSError:
+            pass
+        return dst_dir
+
     def label_from_index(self, index):
         """
         given image index, return preprocessed ground-truth
