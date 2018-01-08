@@ -122,7 +122,7 @@ class ImageNetVID(Imdb):
         """
 
         # filter images that do not have any of the specified classes
-        self.labels = [f[np.logical_and(f[:, 0] > 0, f[:, 0] <= self.num_classes), :] for f in self.labels]
+        self.labels = [f[np.logical_and(f[:, 0] >= 0, f[:, 0] < self.num_classes), :] for f in self.labels]
         #DEBUG: exists np.array([])
         #SOLUTION:  get rid of empty when fetching label
         # for f in self.labels:
@@ -286,6 +286,9 @@ class ImageNetVID(Imdb):
                 ymax = float(xml_box.find('ymax').text) / height
                 label.append([cls_id, xmin, ymin, xmax, ymax, difficult])
             # if len(label) != 0:
+            if len(label) == 0:
+                label.append([99, -1, -1, -1, -1, 1])
+                print(idx, 'is empty')
             temp.append(np.array(label))
         return temp
 
